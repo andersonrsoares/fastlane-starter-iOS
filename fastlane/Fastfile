@@ -1,0 +1,67 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+# https://docs.fastlane.tools/getting-started/ios/beta-deployment/
+
+default_platform(:ios)
+
+platform :ios do
+  #desc "Push a new beta build to TestFlight"
+  #lane :beta do
+  #  build_app(scheme: "TesteFastlane")
+  #  upload_to_testflight
+  #end
+
+  desc "Push a new beta build to TestFlight"
+  lane :beta do
+    get_certificates           # invokes cert  
+  	get_provisioning_profile   # invokes sigh
+    #increment_build_number(
+    #    build_number: app_store_build_number + 1,
+    #    xcodeproj: "TesteFastlane.xcodeproj"
+    # )
+    #match
+    #match(git_url: "https://github.com/fastlane/certificates",
+    #  type: "development")
+    #gym
+    build_app(scheme: "TesteFastlane")
+    upload_to_testflight
+  end
+
+  # configuracao para criar os certificados de push pelo arquivo de fastlane
+  lane :push do
+      #pem --force  -p "123" --development
+      cert
+      get_push_certificate(
+          p12_password: "123",
+          development: true,
+          force: true, # create a new profile, even if the old one is still valid
+          app_identifier: "br.com.andersonrsoares.TesteFastlane", # optional app identifier#,
+          #save_private_key: true
+        )
+
+         get_push_certificate(
+          p12_password: "123",
+          development: false,
+          force: true, # create a new profile, even if the old one is still valid
+          app_identifier: "br.com.andersonrsoares.TesteFastlane", # optional app identifier#,
+          #save_private_key: true
+        )
+  end
+
+  # envio para loja de screenshots, configurar SnapFile ou usar os parametros da documentacao
+  lane :screenshots do
+    capture_screenshots
+    upload_to_app_store
+  end
+
+  # envio para loja os dados de publicacao, configurar Delivefile ou usar os parametros da documentacao
+  lane :metadata do
+    deliver
+  end
+  
+
+end
